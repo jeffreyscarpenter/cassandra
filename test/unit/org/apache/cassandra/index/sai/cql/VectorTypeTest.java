@@ -133,6 +133,8 @@ public class VectorTypeTest extends VectorTester
         execute("SELECT * FROM %s ORDER BY val ann of [9.5, 5.5, 6.5] LIMIT 5");
         // checking this is by manual inspection
         logger.info(((TracingTestImpl) Tracing.instance).getTraces().toString());
+        for (String trace : ((TracingTestImpl) Tracing.instance).getTraces())
+            assertThat(trace).doesNotContain("Executing single-partition query");
     }
 
     @Test
