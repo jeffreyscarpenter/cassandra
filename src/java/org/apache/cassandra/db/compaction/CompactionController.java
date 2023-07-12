@@ -184,7 +184,10 @@ public class CompactionController extends AbstractCompactionController
     {
         long minTimestamp = Long.MAX_VALUE;
         for (Memtable memtable : memtables)
-            minTimestamp = Math.min(minTimestamp, memtable.getMinTimestamp());
+        {
+            if (memtable.getMinTimestamp() != Memtable.NO_MIN_TIMESTAMP) 
+                minTimestamp = Math.min(minTimestamp, memtable.getMinTimestamp());
+        }
         return minTimestamp;
     }
 
@@ -245,18 +248,15 @@ public class CompactionController extends AbstractCompactionController
 
         for (Memtable memtable : memtables)
         {
-            if (memtable.getMinTimestamp() >= minTimestampSeen)
+            long memtableMinTimestamp = memtable.getMinTimestamp();
+            if (memtableMinTimestamp >= minTimestampSeen || memtableMinTimestamp == Memtable.NO_MIN_TIMESTAMP)
                 continue;
 
             Partition partition = memtable.getPartition(key);
             if (partition != null)
             {
-                Partition partition = memtable.getPartition(key);
-                if (partition != null)
-                {
-                    minTimestampSeen = Math.min(minTimestampSeen, partition.stats().minTimestamp);
-                    hasTimestamp = true;
-                }
+                minTimestampSeen = Math.min(minTimestampSeen, partition.stats().minTimestamp);
+                hasTimestamp = true;
             }
         }
 
